@@ -40,20 +40,21 @@ def train_one_epoch(model: torch.nn.Module,
     header = 'Epoch: [{}]'.format(epoch)
     print_freq = 10
         
-    if hasattr(model.module, 'quantize'):
+    if hasattr(model.modules, 'quantize'):
         try:
-            model.module.quantize.reset_cluster_size(device)
+            model.modules.quantize.reset_cluster_size(device)
             print("Reset the codebook statistic info in quantizer before each epoch")
         except:
             pass
         
-    for step, (batch, _) in enumerate(metric_logger.log_every(data_loader, print_freq, header)):
+    for step, batch in enumerate(metric_logger.log_every(data_loader, print_freq, header)):
         # assign learning rate & weight decay for each step
         it = start_steps + step  # global training iteration
         if lr_schedule_values is not None:
             for i, param_group in enumerate(optimizer.param_groups):
                 if lr_schedule_values is not None:
                     param_group["lr"] = lr_schedule_values[it] * param_group.get("lr_scale", 1.0)
+        batch = batch["samples"]
         images = batch.to(device, non_blocking=True)
 
         with torch.cuda.amp.autocast(enabled=True):
@@ -113,11 +114,11 @@ def train_one_epoch(model: torch.nn.Module,
     print("Averaged stats:", metric_logger)
     
     # stat the codebook usage information
-    if hasattr(model.module, 'quantize'):
+    if hasattr(model.modules, 'quantize'):
         try:
-            codebook_cluster_size = model.module.quantize._codebook.cluster_size
+            codebook_cluster_size = model.modules.quantize._codebook.cluster_size
         except:
-            codebook_cluster_size = model.module.quantize.cluster_size
+            codebook_cluster_size = model.modules.quantize.cluster_size
         zero_cnt = (codebook_cluster_size == 0).sum().item()
         train_stat = {k: meter.global_avg for k, meter in metric_logger.meters.items()}
         train_stat['Unused_code'] = zero_cnt
@@ -134,15 +135,16 @@ def evaluate(data_loader, model, device, log_writer=None, epoch=None, args=None)
     # switch to evaluation mode
     model.eval()
 
-    if hasattr(model.module, 'quantize'):
+    if hasattr(model.modules, 'quantize'):
         try:
-            model.module.quantize.reset_cluster_size(device)
+            model.modules.quantize.reset_cluster_size(device)
             print("Reset the codebook statistic info in quantizer before testing")
         except:
             pass
 
-    for step, (batch, extra_info) in enumerate(metric_logger.log_every(data_loader, 10, header)):
+    for step, batch in enumerate(metric_logger.log_every(data_loader, 10, header)):
 
+        batch = batch["samples"]
         images = batch.to(device, non_blocking=True)
         loss, log_loss = model(images)
 

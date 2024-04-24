@@ -89,18 +89,19 @@ class MaskingGenerator:
             else:
                 mask_count += delta
         
+        
         # maintain a fix number {self.num_masking_patches}
         if mask_count > self.num_masking_patches:
             delta = mask_count - self.num_masking_patches
-            mask_x, mask_y = mask.nonzero()
-            to_vis = np.random.choice(mask_x.shape[0], delta, replace=False)
-            mask[mask_x[to_vis], mask_y[to_vis]] = 0
+            idx = mask.nonzero()
+            to_vis = np.random.choice(idx.shape[0], delta, replace=False)
+            mask[idx[to_vis], idx[to_vis]] = 0
 
         elif mask_count < self.num_masking_patches:
             delta = self.num_masking_patches - mask_count
-            mask_x, mask_y = (mask == 0).nonzero()
-            to_mask = np.random.choice(mask_x.shape[0], delta, replace=False)
-            mask[mask_x[to_mask], mask_y[to_mask]] = 1
+            idx = (mask == 0).nonzero()
+            to_mask = np.random.choice(idx.shape[0], delta, replace=False)
+            mask[idx[to_mask], idx[to_mask]] = 1
 
         assert mask.sum() == self.num_masking_patches, f"mask: {mask}, mask count {mask.sum()}"
 
@@ -110,9 +111,11 @@ class MaskingGenerator:
 if __name__ == '__main__':
     import pdb
     generator = MaskingGenerator(input_size=14, num_masking_patches=118, min_num_patches=16,)
-    for i in range(10000000):
-        mask = generator()
-        if mask.sum() != 118:
-            pdb.set_trace()
-            print(mask)
-            print(mask.sum())
+    mask = generator()
+    print(mask)
+    # for i in range(10000000):
+    #     mask = generator()
+    #     if mask.sum() != 118:
+    #         pdb.set_trace()
+    #         print(mask)
+    #         print(mask.sum())

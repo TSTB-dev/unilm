@@ -24,7 +24,7 @@ from pathlib import Path
 
 from timm.models import create_model
 from optim_factory import create_optimizer
-
+from dataset_loco import MVTecLOCO, build_loco_dataset
 from datasets import build_vqkd_dataset
 from engine_for_vqkd import evaluate, train_one_epoch, calculate_codebook_usage
 from utils import NativeScalerWithGradNormCount as NativeScaler
@@ -41,7 +41,7 @@ def get_args():
     parser.add_argument('--save_ckpt_freq', default=20, type=int)
     # Model parameters
     parser.add_argument('--model', default='vqkd_encoder_base_decoder_3x768x12_clip', type=str, metavar='MODEL',  help='Name of model to train')  
-
+    parser.add_argument('--category', default='bottle', type=str, help='category of dataset')
     parser.add_argument('--rec_loss_type', default='cosine', type=str, metavar='MODEL',
                         help='type of loss to calculate reconstruction distance')
 
@@ -96,7 +96,7 @@ def get_args():
                         help='min_crop_scale (default: 0.08)')
 
     # Dataset parameters
-    parser.add_argument('--data_path', default='/datasets01/imagenet_full_size/061417/', type=str,
+    parser.add_argument('--data_root', default='/datasets01/imagenet_full_size/061417/', type=str,
                         help='dataset path')
     parser.add_argument('--eval_data_path', default='', type=str, help='dataset path')
     parser.add_argument('--data_set', default='image_folder', type=str, help='dataset path')
@@ -172,6 +172,11 @@ def main(args):
     seed = args.seed + utils.get_rank()
     torch.manual_seed(seed)
     np.random.seed(seed)
+    args.input_res = args.input_size
+    args.is_mask = False
+    args.masking = "none"
+    args.tokenizer = "vqkd"
+    
     # random.seed(seed)
 
     cudnn.benchmark = True
@@ -179,11 +184,15 @@ def main(args):
     model = get_model(args)
 
     # get dataset
-    dataset_train = build_vqkd_dataset(is_train=True, args=args)
+    dataset_train = build_loco_dataset(
+        args, split="train"
+    )
     if args.disable_eval:
         dataset_val = None
     else:
-        dataset_val = build_vqkd_dataset(is_train=False, args=args)
+        dataset_val = build_loco_dataset(
+            args, split="val"
+        )
 
     if True:  # args.distributed:
         num_tasks = utils.get_world_size()

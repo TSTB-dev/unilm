@@ -326,7 +326,7 @@ class VisionTransformerForMaskedImageModelingCLS(VisionTransformerForMaskedImage
             if i + 1 == self.early_layers:
                 early_states = x[:, 1:]
 
-        x_cls_pt = torch.cat([x[:, [0]], early_states], dim=1)
+        x_cls_pt = torch.cat([x[:, [0]], early_states], dim=1)  # cls token + early layers
         for blk in self.cls_pt_layers:
             x_cls_pt = blk(x_cls_pt, rel_pos_bias=rel_pos_bias)
 

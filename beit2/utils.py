@@ -27,7 +27,7 @@ import argparse
 
 import torch
 import torch.distributed as dist
-from torch._six import inf
+from torch import inf
 
 from tensorboardX import SummaryWriter
 
@@ -56,7 +56,6 @@ class SmoothedValue(object):
     """Track a series of values and provide access to smoothed values over a
     window or the global series average.
     """
-
     def __init__(self, window_size=20, fmt=None):
         if fmt is None:
             fmt = "{median:.4f} ({global_avg:.4f})"
