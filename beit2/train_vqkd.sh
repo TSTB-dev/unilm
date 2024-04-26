@@ -101,10 +101,11 @@
     # parser.add_argument('--dist_on_itp', action='store_true')
     # parser.add_argument('--dist_url', default='env://', help='url used to set up distributed training')
 
-/home/sakai/projects/Reimpl/BEiTv2/beit2/bin/python3 /home/sakai/projects/Reimpl/BEiTv2/unilm/beit2/run_vqkd_training.py \
-    --batch_size 32 \
-    --epochs 500 \
-    --save_ckpt_freq 100 \
+export CUDA_VISIBLE_DEVICES=5
+/home/haselab/projects/sakai/BEiT/beit/bin/python3 /home/haselab/projects/sakai/BEiT/unilm/beit2/run_vqkd_training.py \
+    --batch_size 256 \
+    --epochs 50 \
+    --save_ckpt_freq 50 \
     --model vqkd_encoder_base_decoder_1x768x12_dino \
     --rec_loss_type cosine \
     --codebook_n_emd 20 \
@@ -112,9 +113,9 @@
     --ema_decay 0.99 \
     --quantize_kmeans_init \
     --process_type default \
-    --input_size 384 \
+    --input_size 224 \
     --teacher_model_type dino \
-    --teacher_input_size 384 \
+    --teacher_input_size 224 \
     --opt adamw \
     --opt_eps 1e-8 \
     --opt_betas 0.9 0.999 \
@@ -129,14 +130,12 @@
     --color_jitter 0.0 \
     --train_interpolation bicubic \
     --min_crop_scale 0.00 \
-    --data_root /home/sakai/projects/LADMIM/LADMIM/data/mvtec_loco \
-    --category box \
-    --eval_data_path /home/sakai/projects/LADMIM/LADMIM/data/mvtec_loco \
+    --data_root /home/haselab/projects/sakai/LADMIM/LADMIM/data/mvtec_loco \
+    --category pins \
+    --eval_data_path /home/haselab/projects/sakai/LADMIM/LADMIM/data/mvtec_loco \
     --data_set loco \
     --imagenet_default_mean_and_std \
-    --output_dir /home/sakai/projects/Reimpl/BEiTv2/unilm/beit2/output/vqkd_encoder_base_decoder_1x768x12_dino \
-    --log_dir /home/sakai/projects/Reimpl/BEiTv2/unilm/beit2/output/vqkd_encoder_base_decoder_1x768x12_dino \
+    --output_dir /home/haselab/projects/sakai/BEiT/unilm/beit2/output_pins/vqkd_encoder_base_decoder_1x768x12_dino \
+    --log_dir /home/haselab/projects/sakai/BEiT/unilm/beit2/output_pins/vqkd_encoder_base_decoder_1x768x12_dino \
     --device cuda \
     --seed 0 \
-
-
